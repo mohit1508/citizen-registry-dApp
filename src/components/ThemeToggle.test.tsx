@@ -3,7 +3,6 @@
  * Ensures aria labels/pressed state reflect theme and toggle works.
  */
 import { render, screen, fireEvent } from '@testing-library/react'
-import React from 'react'
 import ThemeToggle from './ThemeToggle'
 
 describe('ThemeToggle', () => {

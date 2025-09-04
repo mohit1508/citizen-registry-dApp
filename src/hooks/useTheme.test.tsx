@@ -4,7 +4,6 @@
  * color-scheme syncing, toggling, and storage write. Also covers error path.
  */
 import { render, screen, fireEvent } from '@testing-library/react'
-import React from 'react'
 import { useTheme, __testOnly_getInitialTheme, applyTheme } from './useTheme'
 
 function TestComp() {
@@ -49,7 +48,6 @@ describe('useTheme', () => {
 
   it('falls back to light if localStorage.getItem throws', () => {
     const original = localStorage.getItem
-    // @ts-expect-error force throw
     localStorage.getItem = () => { throw new Error('fail') }
     render(<TestComp />)
     expect(screen.getByTestId('theme').textContent).toBe('light')
@@ -58,21 +56,23 @@ describe('useTheme', () => {
   })
 
   it('does not crash if localStorage.setItem throws', () => {
-    const original = localStorage.setItem
-    ;(localStorage as any).setItem = () => { throw new Error('boom') }
+    const ls = localStorage as unknown as { setItem: (key: string, value: string) => void }
+    const original = ls.setItem
+    ls.setItem = () => { throw new Error('boom') }
     render(<TestComp />)
     // toggle to trigger write
     fireEvent.click(screen.getByText('toggle'))
     expect(screen.getByTestId('theme').textContent).toMatch(/dark|light/)
     // restore
-    ;(localStorage as any).setItem = original
+    ls.setItem = original
   })
 
   it('test helper covers window undefined branch in initializer', () => {
-    const originalWindow = (globalThis as any).window
-    ;(globalThis as any).window = undefined
+    const g = globalThis as unknown as { window?: Window }
+    const originalWindow = g.window
+    g.window = undefined
     expect(__testOnly_getInitialTheme()).toBe('light')
-    ;(globalThis as any).window = originalWindow
+    g.window = originalWindow
   })
 
   it('applyTheme toggles html.dark class both ways', () => {
