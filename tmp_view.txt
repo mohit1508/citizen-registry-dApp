@@ -1,0 +1,39 @@
+﻿  1: import type { Provider, Log } from 'ethers'
+  2: import type { Citizen } from '../types/citizen'
+  3: import { getCitizenContract, getCitizenInterface } from '../hooks/useCitizenContract'
+  4: 
+  5: const DEPLOY_BLOCK = Number(import.meta.env.VITE_DEPLOY_BLOCK ?? 0)
+  6: 
+  7: export async function fetchCitizens(provider: Provider): Promise<Citizen[]> {
+  8:   const iface = getCitizenInterface()
+  9:   const topic = iface.getEvent('Citizen')!.topicHash
+ 10:   const address = (import.meta.env.VITE_CONTRACT_ADDRESS as string)
+ 11: 
+ 12:   const logs: Log[] = await provider.getLogs({
+ 13:     address,
+ 14:     fromBlock: BigInt(DEPLOY_BLOCK),
+ 15:     toBlock: 'latest',
+ 16:     topics: [topic],
+ 17:   })
+ 18: 
+ 19:   // Parse and map logs to Citizen objects (note is loaded lazily)
+ 20:   const parsed: Citizen[] = logs.map((log) => {
+ 21:     const decoded = iface.parseLog(log)
+ 22:     // args: [id, age, city, name]
+ 23:     const id = Number(decoded!.args[0])
+ 24:     const age = Number(decoded!.args[1])
+ 25:     const city = String(decoded!.args[2])
+ 26:     const name = String(decoded!.args[3])
+ 27:     return { id, age, city, name }
+ 28:   })
+ 29: 
+ 30:   // De-duplicate by id (in case of reorgs or repeated emits)
+ 31:   const byId = new Map<number, Citizen>()
+ 32:   for (const c of parsed) byId.set(c.id, c)
+ 33:   return Array.from(byId.values()).sort((a, b) => a.id - b.id)
+ 34: }
+ 35: 
+ 36: export async function fetchNote(provider: Provider, id: number) {
+ 37:   const contract = getCitizenContract(provider)
+ 38:   return contract.getNoteByCitizenId(id) as Promise<string>
+ 39: }

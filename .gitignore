@@ -1,0 +1,45 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Caches
+.vite/
+.eslintcache
+.tailwindcache/
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Env files (keep example files committed)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Jest
+.jest/
+jest-cache/
+jest-results.json
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+*.swp
+*.swo

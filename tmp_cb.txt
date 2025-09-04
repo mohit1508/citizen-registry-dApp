@@ -1,0 +1,33 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from 'react'
+import { useEthers } from '../hooks/useEthers'
+import toast from 'react-hot-toast'
+
+export default function ConnectButton() {
+  const { connect, ensureSepolia, account } = useEthers()
+  const [busy, setBusy] = useState(false)
+
+  const onClick = async () => {
+    try {
+      setBusy(true)
+      await connect()
+      await ensureSepolia()
+      toast.success('Wallet connected')
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Failed to connect')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (account) {
+    const short = `${account.slice(0, 6)}â€¦${account.slice(-4)}`
+    return <button className="px-3 py-2 rounded bg-gray-200">{short}</button>
+  }
+
+  return (
+    <button disabled={busy} onClick={onClick} className="px-3 py-2 rounded bg-black text-white">
+      {busy ? 'Connectingâ€¦' : 'Connect MetaMask'}
+    </button>
+  )
+}
