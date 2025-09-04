@@ -70,20 +70,27 @@ export function useEthers() {
 
   const connect = async () => {
     // Requests account access and populates signer/account/chainId
-    if (!provider || !window.ethereum) throw new Error('MetaMask not found')
+    if (!window.ethereum) throw new Error('MetaMask not found')
+    // Ensure we always use a fresh BrowserProvider after any potential network changes
+    const freshProvider = new BrowserProvider(window.ethereum)
+    setProvider(freshProvider)
     await window.ethereum.request({ method: 'eth_requestAccounts' })
-    const s = await provider.getSigner()
+    const s = await freshProvider.getSigner()
     setSigner(s)
     const addr = await s.getAddress()
     setAccount(addr)
-    const net = await provider.getNetwork()
+    const net = await freshProvider.getNetwork()
     setChainId(Number(net.chainId))
   }
 
   const ensureSepolia = async () => {
     // Attempts to switch to Sepolia; if the chain is unknown in the wallet,
-    // adds it with relevant RPC and explorer config.
+    // adds it with relevant RPC and explorer config. No-op if already on Sepolia.
     if (!window.ethereum) throw new Error('MetaMask not found')
+    const currentHex = await window.ethereum.request({ method: 'eth_chainId' })
+    if (typeof currentHex === 'string' && currentHex.toLowerCase() === SEPOLIA.chainIdHex.toLowerCase()) {
+      return
+    }
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
@@ -103,6 +110,19 @@ export function useEthers() {
         })
       } else {
         throw err
+      }
+    }
+    // After a successful switch/add, refresh provider network and state
+    const freshProvider = new BrowserProvider(window.ethereum)
+    setProvider(freshProvider)
+    const net = await freshProvider.getNetwork()
+    setChainId(Number(net.chainId))
+    if (account) {
+      try {
+        const s = await freshProvider.getSigner()
+        setSigner(s)
+      } catch {
+        // not connected yet; ignore
       }
     }
   }

@@ -12,8 +12,20 @@ export default function ConnectButton() {
   const onClick = async () => {
     try {
       setBusy(true)
+      // Ensure correct chain; if authorization required, connect first then retry
+      try {
+        await ensureSepolia()
+      } catch (e: unknown) {
+        const code = typeof e === 'object' && e && 'code' in e ? (e as { code?: number }).code : undefined
+        if (code === 4100) {
+          await connect()
+          await ensureSepolia()
+        } else {
+          throw e
+        }
+      }
+      // Make sure account is connected
       await connect()
-      await ensureSepolia()
       toast.success('Wallet connected')
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to connect'

@@ -67,19 +67,19 @@ export default function AddCitizenPage() {
       </div>
 
       <FormField label="Name" error={errors.name}>
-        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="Alice" {...register('name')} />
+        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="" {...register('name')} />
       </FormField>
 
       <FormField label="Age" error={errors.age}>
-        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="33" type="number" {...register('age')} />
+        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="" type="number" {...register('age')} />
       </FormField>
 
       <FormField label="City" error={errors.city}>
-        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="Dubai" {...register('city')} />
+        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" placeholder="" {...register('city')} />
       </FormField>
 
       <FormField label="Note" error={errors.someNote}>
-        <textarea className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" rows={5} placeholder="Some notes…" {...register('someNote')} />
+        <textarea className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2" rows={5} placeholder="" {...register('someNote')} />
       </FormField>
 
       <button
