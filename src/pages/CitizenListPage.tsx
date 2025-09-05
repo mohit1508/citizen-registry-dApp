@@ -3,12 +3,26 @@
 // Improved empty/loading/error states with centered layouts.
 import { useEthers } from '../hooks/useEthers'
 import { useCitizens } from '../hooks/useCitizens'
+import { useMemo, useState } from 'react'
 import CitizenCard from '../components/CitizenCard'
 import CitizensTable from '../components/CitizensTable'
 
 export default function CitizensListPage() {
   const { provider } = useEthers()
   const { data, isLoading, isError, error } = useCitizens(provider)
+  const [page, setPage] = useState(1)
+  const perPage = 10
+
+  // Pagination (compute early so hooks order stays consistent)
+  const { items, totalPages, start, end, total } = useMemo(() => {
+    const totalAll = data?.length ?? 0
+    const totalPages = Math.max(1, Math.ceil(totalAll / perPage))
+    const safePage = Math.min(Math.max(1, page), totalPages)
+    const start = (safePage - 1) * perPage
+    const end = Math.min(start + perPage, totalAll)
+    const src = data ?? []
+    return { items: src.slice(start, end), totalPages, start, end, total: totalAll }
+  }, [data, page])
 
   if (!provider)
     return (
@@ -50,18 +64,55 @@ export default function CitizensListPage() {
       </div>
     )
 
+  const canPrev = page > 1
+  const canNext = page < totalPages
+
+  const Pager = (
+    <div className="mt-4 flex items-center justify-between text-sm">
+      <div className="text-gray-600 dark:text-gray-400">Showing {start + 1}-{end} of {total}</div>
+      <div className="flex items-center gap-2">
+        <button
+          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          onClick={() => setPage(1)}
+          disabled={!canPrev}
+          aria-label="First page"
+        >First</button>
+        <button
+          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={!canPrev}
+          aria-label="Previous page"
+        >Prev</button>
+        <span className="mx-1 text-gray-700 dark:text-gray-300">Page {page} of {totalPages}</span>
+        <button
+          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={!canNext}
+          aria-label="Next page"
+        >Next</button>
+        <button
+          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          onClick={() => setPage(totalPages)}
+          disabled={!canNext}
+          aria-label="Last page"
+        >Last</button>
+      </div>
+    </div>
+  )
+
   return (
     <>
       {/* Mobile: cards */}
       <div className="md:hidden grid gap-4">
-        {data.map((c) => (
+        {items.map((c) => (
           <CitizenCard key={c.id} c={c} provider={provider} />
         ))}
       </div>
+      <div className="md:hidden">{Pager}</div>
 
       {/* Desktop: table */}
-      <CitizensTable citizens={data} provider={provider} />
+      <CitizensTable citizens={items} provider={provider} />
+      <div className="hidden md:block">{Pager}</div>
     </>
   )
 }
-

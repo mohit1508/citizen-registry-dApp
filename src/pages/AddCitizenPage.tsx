@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import FormField from '../components/FormField'
 import { useEthers } from '../hooks/useEthers'
 import { getCitizenContract } from '../hooks/useCitizenContract'
+import { addLocalCitizen } from '../services/localRegistry'
 import { useState } from 'react'
 import type { BrowserProvider } from 'ethers'
 import toast from 'react-hot-toast'
@@ -47,14 +48,23 @@ export default function AddCitizenPage() {
       // refresh list
       qc.invalidateQueries({ queryKey: ['citizens'] })
     } catch (e: unknown) {
-      // Normalize Ethers and wallet errors where possible
-      const message =
-        typeof e === 'object' && e !== null && 'shortMessage' in e
-          ? (e as { shortMessage?: string; message?: string }).shortMessage ?? (e as { message?: string }).message ?? 'Transaction failed'
-          : e instanceof Error
-            ? e.message
-            : 'Transaction failed'
-      toast.error(message)
+      const code = typeof e === 'object' && e && 'code' in e ? (e as { code?: string | number }).code : undefined
+      const isRejected = code === 'ACTION_REJECTED'
+      if (isRejected) {
+        addLocalCitizen({ age: values.age, city: values.city.trim(), name: values.name.trim(), someNote: values.someNote.trim() })
+        toast.success('Citizen added locally for this session')
+        reset()
+        qc.invalidateQueries({ queryKey: ['citizens'] })
+      } else {
+        // Normalize Ethers and wallet errors where possible
+        const message =
+          typeof e === 'object' && e !== null && 'shortMessage' in e
+            ? (e as { shortMessage?: string; message?: string }).shortMessage ?? (e as { message?: string }).message ?? 'Transaction failed'
+            : e instanceof Error
+              ? e.message
+              : 'Transaction failed'
+        toast.error(message)
+      }
     } finally {
       setBusy(false)
     }
@@ -92,4 +102,3 @@ export default function AddCitizenPage() {
     </form>
   )
 }
-

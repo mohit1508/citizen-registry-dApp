@@ -53,10 +53,10 @@ export function useEthers() {
 
     // Initialize with current wallet/account + chain
     void window.ethereum
-      .request({ method: 'eth_accounts' })
+      .request({ method: 'eth_accounts', params: [] })
       .then((accs) => handleAccounts(accs as string[]))
     void window.ethereum
-      .request({ method: 'eth_chainId' })
+      .request({ method: 'eth_chainId', params: [] })
       .then((hex) => handleChain(hex as string))
 
     window.ethereum.on('accountsChanged', handleAccounts)
@@ -74,7 +74,7 @@ export function useEthers() {
     // Ensure we always use a fresh BrowserProvider after any potential network changes
     const freshProvider = new BrowserProvider(window.ethereum)
     setProvider(freshProvider)
-    await window.ethereum.request({ method: 'eth_requestAccounts' })
+    await window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
     const s = await freshProvider.getSigner()
     setSigner(s)
     const addr = await s.getAddress()
@@ -87,21 +87,21 @@ export function useEthers() {
     // Attempts to switch to Sepolia; if the chain is unknown in the wallet,
     // adds it with relevant RPC and explorer config. No-op if already on Sepolia.
     if (!window.ethereum) throw new Error('MetaMask not found')
-    const currentHex = await window.ethereum.request({ method: 'eth_chainId' })
+    const currentHex = await window.ethereum.request({ method: 'eth_chainId', params: [] })
     if (typeof currentHex === 'string' && currentHex.toLowerCase() === SEPOLIA.chainIdHex.toLowerCase()) {
       return
     }
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: SEPOLIA.chainIdHex }],
+        params: [{ chainId: SEPOLIA.chainIdHex.toLowerCase() }],
       })
     } catch (err: unknown) {
       if (hasCode(err) && err.code === 4902) {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: SEPOLIA.chainIdHex,
+            chainId: SEPOLIA.chainIdHex.toLowerCase(),
             chainName: SEPOLIA.chainName,
             rpcUrls: SEPOLIA.rpcUrls,
             nativeCurrency: SEPOLIA.nativeCurrency,

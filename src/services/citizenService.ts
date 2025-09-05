@@ -8,6 +8,7 @@ import type { Provider, Log } from 'ethers'
 import type { Citizen } from '../types/citizen'
 import { getCitizenContract, getCitizenInterface } from '../hooks/useCitizenContract'
 import { env } from '../env'
+import { getLocalCitizens, getLocalNote } from './localRegistry'
 
 /* istanbul ignore next: config value read once at module load */
 const DEPLOY_BLOCK = Number(env.VITE_DEPLOY_BLOCK ?? 0)
@@ -69,13 +70,17 @@ export async function fetchCitizens(provider: Provider): Promise<Citizen[]> {
     })
   )
 
-  // De-duplicate by id (in case of reorgs or repeated emits)
+  // Merge with local session citizens and de-duplicate by id
   const byId = new Map<number, Citizen>()
   for (const c of parsed) byId.set(c.id, c)
+  for (const c of getLocalCitizens()) byId.set(c.id, c)
   return Array.from(byId.values()).sort((a, b) => a.id - b.id)
 }
 
 export async function fetchNote(provider: Provider, id: number) {
+  // Return local note when id belongs to local session entries (negative ids)
+  const local = getLocalNote(id)
+  if (local != null) return local
   const contract = getCitizenContract(provider)
   return contract.getNoteByCitizenId(id) as Promise<string>
 }

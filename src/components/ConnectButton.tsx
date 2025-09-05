@@ -12,6 +12,7 @@ export default function ConnectButton() {
   const onClick = async () => {
     try {
       setBusy(true)
+      const needConnectInitially = !account
       // Ensure correct chain; if authorization required, connect first then retry
       try {
         await ensureSepolia()
@@ -24,10 +25,16 @@ export default function ConnectButton() {
           throw e
         }
       }
-      // Make sure account is connected
-      await connect()
+      // Make sure account is connected (avoid a second prompt if already connected)
+      if (needConnectInitially) {
+        await connect()
+      }
       toast.success('Wallet connected')
     } catch (e: unknown) {
+      const code = typeof e === 'object' && e && 'code' in e ? (e as { code?: number }).code : undefined
+      if (code === -32603) {
+        window.location.reload()
+      }
       const message = e instanceof Error ? e.message : 'Failed to connect'
       toast.error(message)
     } finally {
@@ -36,7 +43,7 @@ export default function ConnectButton() {
   }
 
   if (account) {
-    const short = `${account.slice(0, 6)}…${account.slice(-4)}`
+    const short = `${account.slice(0, 6)}...${account.slice(-4)}`
     return (
       <button className="px-3 py-2 rounded-md bg-sky-50 text-sky-900 border border-sky-200 dark:bg-sky-950 dark:text-sky-200 dark:border-sky-800">
         {short}
@@ -50,8 +57,7 @@ export default function ConnectButton() {
       onClick={onClick}
       className="px-3 py-2 rounded-md bg-black text-white hover:bg-gray-800 disabled:opacity-60 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white"
     >
-      {busy ? 'Connecting…' : 'Connect MetaMask'}
+      {busy ? 'Connecting...' : 'Connect MetaMask'}
     </button>
   )
 }
-

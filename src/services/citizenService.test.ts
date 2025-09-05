@@ -3,6 +3,7 @@
  * Covers fetchCitizens log mapping, tx parsing fallback, de-duplication, and fetchNote.
  */
 import { fetchCitizens, fetchNote } from './citizenService'
+import { addLocalCitizen } from './localRegistry'
 import { getCitizenInterface } from '../hooks/useCitizenContract'
 import type { Provider } from 'ethers'
 
@@ -104,5 +105,17 @@ describe('citizenService', () => {
   it('fetchNote calls contract getter', async () => {
     const result = await fetchNote({} as unknown as Provider, 7)
     expect(result).toBe('note-7')
+  })
+
+  it('merges local citizens and reads local note', async () => {
+    const local = addLocalCitizen({ age: 21, city: 'LocalCity', name: 'LocalName', someNote: 'LocalNote' })
+    const provider = {
+      getLogs: jest.fn().mockResolvedValue([{ transactionHash: '0xaaa' }]),
+      getTransaction: jest.fn().mockResolvedValue(null),
+    } as unknown as Provider
+    const list = await fetchCitizens(provider)
+    expect(list.some((c) => c.id === local.id && c.name === 'LocalName')).toBe(true)
+    const note = await fetchNote({} as unknown as Provider, local.id)
+    expect(note).toBe('LocalNote')
   })
 })

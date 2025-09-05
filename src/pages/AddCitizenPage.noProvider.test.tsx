@@ -23,10 +23,10 @@ describe('AddCitizenPage (no provider)', () => {
         <AddCitizenPage />
       </QueryClientProvider>
     )
-    await user.type(screen.getByPlaceholderText('Alice'), 'Alice')
-    await user.type(screen.getByPlaceholderText('33'), '33')
-    await user.type(screen.getByPlaceholderText('Dubai'), 'Dubai')
-    await user.type(screen.getByPlaceholderText(/Some notes/i), 'Note text')
+    await user.type(screen.getByLabelText('Name'), 'Alice')
+    await user.type(screen.getByLabelText('Age'), '33')
+    await user.type(screen.getByLabelText('City'), 'Dubai')
+    await user.type(screen.getByLabelText('Note'), 'Note text')
     await user.click(screen.getByRole('button', { name: /Add Citizen/i }))
     expect(toast.error).toHaveBeenCalledWith('MetaMask not detected')
   })

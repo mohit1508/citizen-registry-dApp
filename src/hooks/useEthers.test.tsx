@@ -70,6 +70,12 @@ describe('useEthers', () => {
 
   it('ensureSepolia: switches chain when available', async () => {
     const request = (window as unknown as { ethereum: { request: jest.Mock } }).ethereum.request
+    // Return non-Sepolia chain id for both initialization and ensure path
+    request.mockImplementation(async ({ method }: { method: string }) => {
+      if (method === 'eth_accounts') return []
+      if (method === 'eth_chainId') return '0x1'
+      return undefined
+    })
     const { result } = renderHook(() => useEthers())
     await act(async () => { await result.current.ensureSepolia() })
     expect(request).toHaveBeenCalledWith({ method: 'wallet_switchEthereumChain', params: [expect.any(Object)] })
@@ -80,7 +86,7 @@ describe('useEthers', () => {
     // Provide a full implementation covering initialization calls and the switch/add flow
     req.mockImplementation(async ({ method }: { method: string }) => {
       if (method === 'eth_accounts') return []
-      if (method === 'eth_chainId') return '0xAA36A7'
+      if (method === 'eth_chainId') return '0x1'
       if (method === 'wallet_switchEthereumChain') throw { code: 4902 }
       if (method === 'wallet_addEthereumChain') return undefined
       return undefined
