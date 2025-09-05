@@ -9,6 +9,7 @@ A React + Vite dApp for managing a simple on‑chain “citizens” registry on 
 - Per‑row “Show note” loads the note lazily
 - Light/dark theme with persistent toggle (localStorage)
 - Responsive: cards on mobile, table on desktop
+ - Session‑only local add fallback (no funds required)
 
 ## Tech Stack
 
@@ -76,6 +77,16 @@ Implementation details
   - Light: `/logo.png`
   - Dark: `/logo-light.png`
 
+## Local Add Fallback (No Funds)
+
+When you don’t have Sepolia funds or you reject the MetaMask prompt, the app can still accept new citizens for the current browser session:
+
+- Trigger: if the wallet returns `code: "ACTION_REJECTED"` on `addCitizen`, the app stores the entry locally instead of failing.
+- Storage: entries are saved in `sessionStorage` and cleared when the tab/window is closed.
+- Identification: locally added citizens receive negative IDs to avoid collisions with on‑chain IDs.
+- Merging: the citizens list merges on‑chain data with local session entries; notes for local entries are read from the same session storage.
+- Scope: this is a convenience for demos/tests; on‑chain state remains the source of truth when transactions succeed.
+
 ## Testing
 
 - Run unit tests:
@@ -121,4 +132,3 @@ index.html            # Theme bootstrap + root
 - `npm run preview` — preview the production build
 - `npm run lint` — run ESLint
 - `npm test` — run tests
-

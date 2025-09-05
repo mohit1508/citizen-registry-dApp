@@ -37,6 +37,7 @@ export function addLocalCitizen(input: { age: number; city: string; name: string
 }
 
 export function getLocalCitizens(): Citizen[] {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return readAll().map(({ someNote, ...rest }) => rest)
 }
 
