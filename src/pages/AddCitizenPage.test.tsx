@@ -44,13 +44,20 @@ describe('AddCitizenPage', () => {
     account = null
   })
 
-  it('shows validation errors when submitting empty form', async () => {
+  it('shows validation errors when fields are touched and left empty', async () => {
     const user = userEvent.setup()
     renderWithProviders(<AddCitizenPage />)
-    await user.click(screen.getByRole('button', { name: /Add Citizen/i }))
-    expect(await screen.findByText('Name is required')).toBeInTheDocument()
-    expect(screen.getByText('Must be at least 18')).toBeInTheDocument()
-    expect(screen.getByText('City is required')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('Name'))
+    await user.tab()
+    await user.click(screen.getByLabelText('Age'))
+    await user.tab()
+    await user.click(screen.getByLabelText('City'))
+    await user.tab()
+    await user.click(screen.getByLabelText('Note'))
+    await user.tab()
+    expect(await screen.findByText('Name cannot be empty.')).toBeInTheDocument()
+    expect(screen.getByText('Age cannot be empty.')).toBeInTheDocument()
+    expect(screen.getByText('City cannot be empty.')).toBeInTheDocument()
     expect(screen.getByText('Note is required')).toBeInTheDocument()
   })
 

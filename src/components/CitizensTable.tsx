@@ -50,7 +50,7 @@ export default function CitizensTable({
               <td className="px-4 py-3 font-medium">{c.name}</td>
               <td className="px-4 py-3">{c.age}</td>
               <td className="px-4 py-3">{c.city}</td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3 max-w-48">
                 <NoteCell id={c.id} provider={provider} />
               </td>
             </tr>
