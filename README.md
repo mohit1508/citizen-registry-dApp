@@ -1,15 +1,17 @@
 # Citizens Registry
 
-A React + Vite dApp for managing a simple on‑chain “citizens” registry on Sepolia using Ethers v6. It lists citizens emitted by a smart‑contract event, lets you add new citizens, and view per‑citizen notes. Styling uses Tailwind CSS (v4). State/IO is handled with React Query and React Hook Form.
+A React + Vite dApp for managing a simple on‑chain citizens registry on Sepolia using Ethers v6. It lists citizens emitted by a smart‑contract event, lets you add new citizens, and view per‑citizen notes. Styling uses Tailwind CSS (v4). Data fetching/caching is handled with React Query; forms with React Hook Form and Zod.
 
 ## Features
 
-- Add a citizen (age, city, name, note) via connected wallet
-- List citizens from contract logs with graceful fallbacks
-- Per‑row “Show note” loads the note lazily
-- Light/dark theme with persistent toggle (localStorage)
-- Responsive: cards on mobile, table on desktop
- - Session‑only local add fallback (no funds required)
+- Wallet connect: Guides install/connect of MetaMask and ensures Sepolia is selected.
+- Citizens directory: Lists citizens from contract logs with graceful empty/error states.
+- Search & sort: Search by name, city, or age; sort by ID, name, age, city with ascending/descending toggle.
+- Pagination: 10 items per page with first/prev/next/last controls and validated page input.
+- Notes on demand: Per‑row “Show note” loads the note lazily and caches it.
+- Add citizen: Add age, city, name, note via connected wallet with form validation.
+- Local fallback: Session‑only local add when a transaction is rejected (no funds required).
+- Theme: Light/dark theme with persistent toggle (localStorage).
 
 ## Tech Stack
 
@@ -25,6 +27,7 @@ A React + Vite dApp for managing a simple on‑chain “citizens” registry on 
 ### 1) Prerequisites
 
 - Node.js 18+ (LTS recommended)
+- MetaMask (or compatible) wallet in your browser
 - A Sepolia RPC (e.g., Infura/Alchemy) configured in your wallet
 - A deployed contract compatible with the provided ABI (`src/abi/testTaskABI.json`)
 
@@ -98,7 +101,8 @@ When you don’t have Sepolia funds or you reject the MetaMask prompt, the app c
 
 Notes
 - Tests use JSDOM and React Testing Library.
-- Some environment‑specific branches are covered via test helpers; others are intentionally ignored with `/* istanbul ignore */` comments where deterministic coverage isn’t feasible.
+- High‑value interaction tests cover search, sort, and pagination on the citizen list, and full Add Citizen flows (success, rejection fallback, error paths).
+- The repository is configured with strict coverage thresholds in `jest.config.cjs`.
 
 ## Project Structure
 
@@ -116,15 +120,6 @@ src/
 index.html            # Theme bootstrap + root
 ```
 
-## Troubleshooting
-
-- I see only “Unknown” in the City column
-  - Ensure the contract and ABI match. If the event uses an indexed string for `city`, the UI will show a short hash when the transaction input cannot be parsed.
-- No citizens display
-  - Check `VITE_CONTRACT_ADDRESS` and `VITE_DEPLOY_BLOCK` and that your RPC sees the correct network.
-- Theme doesn’t change
-  - Clear `localStorage.theme`, hard refresh. The `html` element must toggle the `dark` class; Tailwind `dark:` variants depend on it.
-
 ## Scripts
 
 - `npm run dev` — start Vite dev server
@@ -132,3 +127,4 @@ index.html            # Theme bootstrap + root
 - `npm run preview` — preview the production build
 - `npm run lint` — run ESLint
 - `npm test` — run tests
+
