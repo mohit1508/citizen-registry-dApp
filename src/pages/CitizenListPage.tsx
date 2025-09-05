@@ -72,26 +72,26 @@ export default function CitizensListPage() {
       <div className="text-gray-600 dark:text-gray-400">Showing {start + 1}-{end} of {total}</div>
       <div className="flex items-center gap-2">
         <button
-          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          className="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
           onClick={() => setPage(1)}
           disabled={!canPrev}
           aria-label="First page"
         >First</button>
         <button
-          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          className="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={!canPrev}
           aria-label="Previous page"
         >Prev</button>
         <span className="mx-1 text-gray-700 dark:text-gray-300">Page {page} of {totalPages}</span>
         <button
-          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          className="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={!canNext}
           aria-label="Next page"
         >Next</button>
         <button
-          className="px-2 py-1 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+          className="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 disabled:opacity-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
           onClick={() => setPage(totalPages)}
           disabled={!canNext}
           aria-label="Last page"

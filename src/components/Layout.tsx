@@ -1,3 +1,6 @@
+// Layout
+// Shell component providing navigation and consistent spacing.
+// Renders children content within a centered container.
 import { Outlet, Link, NavLink } from 'react-router-dom'
 import ConnectButton from './ConnectButton'
 import ThemeToggle from './ThemeToggle'
@@ -46,6 +49,3 @@ export default function Layout() {
     </div>
   )
 }
-// Layout
-// Shell component providing navigation and consistent spacing.
-// Renders children content within a centered container.

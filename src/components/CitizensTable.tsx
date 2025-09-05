@@ -16,7 +16,7 @@ function NoteCell({ id, provider }: { id: number; provider: Provider | null }) {
         {open ? 'Hide note' : 'Show note'}
       </button>
       {open && (
-        <span className="text-sm text-gray-800">
+        <span className="text-sm text-gray-800 dark:text-gray-300">
           {isLoading ? 'Loading…' : (note ?? '—')}
         </span>
       )}
