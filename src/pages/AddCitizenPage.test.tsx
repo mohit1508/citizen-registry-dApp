@@ -2,7 +2,7 @@
  * AddCitizenPage.test.tsx
  * Covers validation errors, success submission, and error normalization path.
  */
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -173,5 +173,31 @@ describe('AddCitizenPage', () => {
     expect(toast.error).toHaveBeenCalledWith('Transaction failed')
   })
 
+  it('renders right-aligned counters and enforces new max lengths', async () => {
+    renderWithProviders(<AddCitizenPage />)
+
+    // Initial counters
+    expect(screen.getByText('0/50')).toBeInTheDocument() // name
+    expect(screen.getByText('0/100')).toBeInTheDocument() // city
+    expect(screen.getByText('0/200')).toBeInTheDocument() // note
+
+    // Name: clamp to 50
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'A'.repeat(60) } })
+    expect((screen.getByLabelText('Name') as HTMLInputElement).value.length).toBe(50)
+    expect(screen.getByText('50/50')).toBeInTheDocument()
+
+    // City: clamp to 100
+    fireEvent.change(screen.getByLabelText('City'), { target: { value: 'B'.repeat(120) } })
+    expect((screen.getByLabelText('City') as HTMLInputElement).value.length).toBe(100)
+    expect(screen.getByText('100/100')).toBeInTheDocument()
+
+    // Note: clamp to 200
+    fireEvent.change(screen.getByLabelText('Note'), { target: { value: 'c'.repeat(220) } })
+    expect((screen.getByLabelText('Note') as HTMLTextAreaElement).value.length).toBe(200)
+    expect(screen.getByText('200/200')).toBeInTheDocument()
+
+    // Age should not render a counter (no 0/3 etc.)
+    expect(screen.queryByText(/\b0\/3\b/)).not.toBeInTheDocument()
+  })
   
 })

@@ -21,7 +21,7 @@ const Schema = z.object({
     .string()
     .trim()
     .min(1, 'Name cannot be empty.')
-    .max(20, 'Name cannot be more than 20 characters.')
+    .max(50, 'Name cannot be more than 50 characters.')
     .refine((v) => onlyLetters.test(v), { message: 'Name must contain only letters and spaces.' }),
   age: z
     .preprocess((v) => (typeof v === 'string' ? v.trim() : v), z.string().min(1, 'Age cannot be empty.'))
@@ -34,13 +34,13 @@ const Schema = z.object({
     .string()
     .trim()
     .min(1, 'City cannot be empty.')
-    .max(20, 'City cannot be more than 20 characters.')
+    .max(100, 'City cannot be more than 100 characters.')
     .refine((v) => onlyLetters.test(v), { message: 'City must contain only letters and spaces.' }),
   someNote: z
     .string()
     .trim()
     .min(1, 'Note is required')
-    .max(150, 'Note cannot be more than 150 characters.')
+    .max(200, 'Note cannot be more than 200 characters.')
     .refine((v) => !/[<>]/.test(v), { message: 'Note cannot contain angle brackets.' })
     .refine((v) => !/(--|;|\/\*|\*\/)/.test(v), { message: 'Note contains disallowed sequences.' }),
 })
@@ -51,11 +51,20 @@ export default function AddCitizenPage() {
   const [busy, setBusy] = useState(false)
   const qc = useQueryClient()
 
-  const { register, handleSubmit, formState: { errors, isValid }, reset, setValue } = useForm<z.input<typeof Schema>, unknown, FormValues>({
+  const { register, handleSubmit, formState: { errors, isValid }, reset, setValue, watch } = useForm<z.input<typeof Schema>, unknown, FormValues>({
     resolver: zodResolver(Schema),
     mode: 'onTouched',
     reValidateMode: 'onChange',
   })
+
+  // Live values for simple counters
+  const nameVal = (watch('name') as unknown as string) ?? ''
+  const cityVal = (watch('city') as unknown as string) ?? ''
+  const noteVal = (watch('someNote') as unknown as string) ?? ''
+  const NAME_MAX = 50
+  const CITY_MAX = 100
+  const AGE_MAX = 3
+  const NOTE_MAX = 200
 
   const onSubmit = async (values: FormValues) => {
     if (!provider) return toast.error('MetaMask not detected')
@@ -99,15 +108,15 @@ export default function AddCitizenPage() {
         You are {account ? <span className="font-medium">connected</span> : <span className="font-medium">not connected</span>}. You'll be prompted in MetaMask on submit.
       </div>
 
-      <FormField label="Name" error={errors.name}>
+      <FormField label="Name" error={errors.name} footerRight={<span>{nameVal.length}/{NAME_MAX}</span>}>
         <input
           className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2"
           aria-label="Name"
-          maxLength={20}
+          maxLength={NAME_MAX}
           pattern="[A-Za-z ]*"
           {...register('name', {
             onChange: (e) => {
-              const sanitized = e.target.value.replace(/[^A-Za-z ]/g, '').slice(0, 20)
+              const sanitized = e.target.value.replace(/[^A-Za-z ]/g, '').slice(0, NAME_MAX)
               setValue('name', sanitized, { shouldValidate: true, shouldDirty: true })
             },
           })}
@@ -121,37 +130,37 @@ export default function AddCitizenPage() {
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          maxLength={3}
+          maxLength={AGE_MAX}
           {...register('age', {
             onChange: (e) => {
-              const sanitized = e.target.value.replace(/[^0-9]/g, '').slice(0, 3)
+              const sanitized = e.target.value.replace(/[^0-9]/g, '').slice(0, AGE_MAX)
               setValue('age', sanitized as unknown as number, { shouldValidate: true, shouldDirty: true })
             },
           })}
         />
       </FormField>
 
-      <FormField label="City" error={errors.city}>
+      <FormField label="City" error={errors.city} footerRight={<span>{cityVal.length}/{CITY_MAX}</span>}>
         <input
           className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2"
           aria-label="City"
-          maxLength={20}
+          maxLength={CITY_MAX}
           pattern="[A-Za-z ]*"
           {...register('city', {
             onChange: (e) => {
-              const sanitized = e.target.value.replace(/[^A-Za-z ]/g, '').slice(0, 20)
+              const sanitized = e.target.value.replace(/[^A-Za-z ]/g, '').slice(0, CITY_MAX)
               setValue('city', sanitized, { shouldValidate: true, shouldDirty: true })
             },
           })}
         />
       </FormField>
 
-      <FormField label="Note" error={errors.someNote}>
+      <FormField label="Note" error={errors.someNote} footerRight={<span>{noteVal.length}/{NOTE_MAX}</span>}>
         <textarea
           className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2"
           aria-label="Note"
           rows={5}
-          maxLength={150}
+          maxLength={NOTE_MAX}
           {...register('someNote', {
             onChange: (e) => {
               // Basic input sanitation to reduce XSS/SQLi risk: remove angle brackets and common SQL comment/statement tokens
@@ -162,7 +171,7 @@ export default function AddCitizenPage() {
                 .replace(/;+/g, '')
                 .replace(/\/\*/g, '')
                 .replace(/\*\//g, '')
-                .slice(0, 150)
+                .slice(0, NOTE_MAX)
               setValue('someNote', sanitized, { shouldValidate: true, shouldDirty: true })
             },
           })}
@@ -179,5 +188,3 @@ export default function AddCitizenPage() {
     </form>
   )
 }
-
-
